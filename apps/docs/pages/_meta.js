@@ -17,7 +17,7 @@ export default {
   contact: {
     title: "Blog ↗",
     type: "page",
-    href: "https://twitter.com/kyleqiq",
+    href: "https://twitter.com/kyleqiqx",
     newWindow: true,
   },
 };
