@@ -3,10 +3,6 @@ const config = {
   displayName: null,
   appId: null,
   version: "1.0.0",
-  design: {
-    icon: "./assets/images/icon.png",
-    splash: "./assets/images/splash.png",
-  },
   ios: {
     teamId: process.env.N2A_IOS_TEAM_ID,
   },
@@ -16,6 +12,14 @@ const config = {
       keystorePassword: process.env.N2A_ANDROID_KEYSTORE_PASSWORD,
       keyAlias: "upload",
       keyPassword: process.env.N2A_ANDROID_KEY_PASSWORD,
+    },
+  },
+  design: {
+    icon: "./assets/images/icon.png",
+    splash: {
+      backgroundColor: "#ffffff",
+      image: "./assets/images/splash.png",
+      imageWidth: 200,
     },
   },
 };
