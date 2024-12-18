@@ -3,6 +3,7 @@ const config = {
   displayName: null,
   appId: null,
   version: "1.0.0",
+  scheme: "yourscheme",
   ios: {
     teamId: process.env.N2A_IOS_TEAM_ID,
   },
