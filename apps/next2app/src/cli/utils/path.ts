@@ -44,6 +44,12 @@ export const getExpoAppNameFromConfig = async (): Promise<string> => {
 };
 
 export const PATHS = {
+  DEV_EXPO_TEMPLATE: path.join(
+    CLI_ROOT,
+    "../../..", // Go up to monorepo root
+    "packages",
+    "expo-template"
+  ),
   CLI: {
     ROOT: CLI_ROOT,
     TEMPLATES: path.join(CLI_ROOT, DIRECTORY_NAMES.TEMPLATES),

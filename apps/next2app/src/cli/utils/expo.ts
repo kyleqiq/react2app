@@ -29,7 +29,15 @@ export async function checkExpoEnvFileExist(): Promise<boolean> {
   return fs.exists(ENV_FILE);
 }
 
-export async function createExpoProject(projectName: string) {
+interface CreateExpoProjectOptions {
+  projectName?: string;
+  template?: string;
+}
+
+export async function createExpoProject({
+  projectName = "my-app",
+  template = FILE_NAMES.EXPO.TEMPLATE, // Default template - @next2app/expo-template
+}: CreateExpoProjectOptions) {
   try {
     const N2ARootDir = PATHS.N2A.ROOT;
     fs.ensureDirSync(N2ARootDir);
@@ -66,13 +74,7 @@ export async function createExpoProject(projectName: string) {
     await new Promise((resolve, reject) => {
       const process = spawn(
         "npx",
-        [
-          "create-expo-app",
-          projectName,
-          "--template",
-          FILE_NAMES.EXPO.TEMPLATE,
-          "--yes",
-        ],
+        ["create-expo-app", projectName, "--template", template, "--yes"],
         {
           cwd: N2ARootDir,
           stdio: ["ignore", "pipe", "pipe"],

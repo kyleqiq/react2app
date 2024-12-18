@@ -11,6 +11,7 @@ export interface DevCommandOptions {
   packageManager?: PackageManager;
   port?: number; // web server port
   host?: string; // web server host
+  dev?: boolean;
 }
 
 export interface BuildCommandOptions {}

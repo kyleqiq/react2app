@@ -9,8 +9,19 @@ import { convertPackageNameToProjectName } from "./packageName.js";
 import fs from "fs-extra";
 import { syncN2AConfigWithExpo } from "./sync.js";
 import { addAppLayout } from "./ux.js";
+import { FILE_NAMES } from "../config/constants.js";
 
-export const initN2AProject = async () => {
+interface InitN2AProjectOptions {
+  isDevMode?: boolean;
+}
+
+const DEFAULT_OPTIONS: InitN2AProjectOptions = {
+  isDevMode: false,
+};
+
+export const initN2AProject = async (
+  options: InitN2AProjectOptions = DEFAULT_OPTIONS
+) => {
   try {
     // Setup N2A config
     await createN2AConfig();
@@ -50,7 +61,12 @@ export const initN2AProject = async () => {
     });
 
     // Setup Expo project
-    await createExpoProject(projectName);
+    await createExpoProject({
+      projectName,
+      template: options.isDevMode
+        ? PATHS.DEV_EXPO_TEMPLATE
+        : FILE_NAMES.EXPO.TEMPLATE,
+    });
 
     await syncN2AConfigWithExpo();
 

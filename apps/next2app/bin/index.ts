@@ -25,6 +25,7 @@ program
   .option("-d, --debug", "Show detailed dev server logs for debugging")
   .option("-H, --host <host>", "Web server host")
   .option("-p, --port <port>", "Web server port")
+  .option("-D, --dev", "Use local development template (For contributors)")
   .action(
     async (platform: Platform = PLATFORM.ALL, options: DevCommandOptions) => {
       dev(platform, options);

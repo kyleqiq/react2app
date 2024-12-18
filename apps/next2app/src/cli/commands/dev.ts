@@ -11,7 +11,7 @@ import { addAppLayout } from "../utils/ux.js";
 import { cleanupN2A } from "../utils/cleanUp.js";
 import { getLocalIPAddress, validatePort } from "../utils/network.js";
 import { frameworks } from "../config/frameworks.js";
-import { initN2AProject as initN2AProject } from "../utils/init.js";
+import { initN2AProject } from "../utils/init.js";
 import { PATHS, validateProjectRoot } from "../utils/path.js";
 import { syncN2AConfigWithExpo } from "../utils/sync.js";
 
@@ -20,12 +20,15 @@ export const dev = async (
   options: DevCommandOptions
 ): Promise<void> => {
   try {
+    if (options.dev) {
+      logger.info("Dev mode enabled");
+    }
     validateProjectRoot();
     const N2AConfig = await loadN2AConfig();
     const isFirstExecution = !N2AConfig;
 
     if (isFirstExecution) {
-      await initN2AProject();
+      await initN2AProject({ isDevMode: options.dev });
     } else {
       await doctor();
       await syncN2AConfigWithExpo();
