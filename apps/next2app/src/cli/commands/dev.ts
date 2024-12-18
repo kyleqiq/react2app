@@ -7,7 +7,6 @@ import { logger } from "../utils/logger.js";
 import { loadN2AConfig as loadN2AConfig } from "../utils/config.js";
 import { updateExpoEnvFile } from "../utils/expo.js";
 import { doctor } from "./doctor.js";
-import { addAppLayout } from "../utils/ux.js";
 import { cleanupN2A } from "../utils/cleanUp.js";
 import { getLocalIPAddress, validatePort } from "../utils/network.js";
 import { frameworks } from "../config/frameworks.js";
@@ -34,29 +33,25 @@ export const dev = async (
       await syncN2AConfigWithExpo();
     }
 
-    const cliOptionHost = options.host;
-    const cliOptionPort = options.port;
-    const defaultHost = getLocalIPAddress();
-    const defaultPort = await getPort({ port: frameworks.nextjs.defaultPort });
+    const ipAddress = getLocalIPAddress();
+    const webHost = options.host || ipAddress;
+    const webPort = await getPort({
+      port: options.port || [3000, 3001, 3002, 3003, 3004, 3005, 3006, 3007],
+    });
+    const expoHost = options.host || ipAddress;
+    const expoPort = await getPort({
+      port: options.port || [8081, 8082, 8083, 8084, 8085, 8086, 8087, 8088],
+    });
 
-    const webHost = cliOptionHost || defaultHost;
-    const webPort =
-      cliOptionPort && validatePort(cliOptionPort)
-        ? cliOptionPort
-        : defaultPort;
-    const expoHost = cliOptionHost || defaultHost;
-    const expoPort = await getPort({ port: frameworks.expo.defaultPort });
-
-    const webviewUrl = `http://${webHost}:${webPort}`;
     await updateExpoEnvFile({
-      EXPO_PUBLIC_WEBVIEW_URL: webviewUrl,
+      EXPO_PUBLIC_WEBVIEW_URL: `http://${webHost}:${webPort}`,
     });
 
     runDevServer({
       webServer: {
         framework: frameworks.nextjs,
         host: webHost,
-        port: Number(webPort),
+        port: webPort,
         debug: options.debug,
         cwd: PATHS.NEXTJS.ROOT,
         logColor: chalk.blue,
@@ -64,7 +59,7 @@ export const dev = async (
       appServer: {
         framework: frameworks.expo,
         host: expoHost,
-        port: Number(expoPort),
+        port: expoPort,
         debug: options.debug,
         cwd: (await PATHS.getExpoPaths()).ROOT,
         logColor: chalk.yellow,
