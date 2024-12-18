@@ -32,11 +32,10 @@ export const getExpoAppNameFromDirectory = async (): Promise<string | null> => {
 };
 
 export const getExpoAppNameFromConfig = async (): Promise<string> => {
-  const N2AConfigPath = path.join(PATHS.N2A.CONFIG_FILE);
-  if (!fs.existsSync(N2AConfigPath)) {
+  if (!fs.existsSync(PATHS.N2A.CONFIG_FILE)) {
     throw new Error("next2app.config.js not found in project root");
   }
-  const { default: config } = await import(N2AConfigPath);
+  const { default: config } = await import(PATHS.N2A.CONFIG_FILE);
   if (!config.projectName) {
     throw new Error("Project name not set in next2app.config.js");
   }

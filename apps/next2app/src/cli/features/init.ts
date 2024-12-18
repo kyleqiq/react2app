@@ -33,10 +33,10 @@ export const initN2A = async (
     const projectName = convertPackageNameToProjectName(packageName);
     const displayName = convertPackageNameToDisplayName(packageName);
     const appId = convertPackageNameToAppId(packageName);
-    // const { default: N2AConfig } = await import(PATHS.N2A.CONFIG_FILE);
-    // N2AConfig.projectName = projectName;
-    // N2AConfig.displayName = displayName;
-    // N2AConfig.appId = appId;
+    const { default: N2AConfig } = await import(PATHS.N2A.CONFIG_FILE);
+    N2AConfig.projectName = projectName;
+    N2AConfig.displayName = displayName;
+    N2AConfig.appId = appId;
     const template = await fs.readFile(PATHS.CLI.CONFIG_TEMPLATE, "utf-8");
     const configContent = template
       .replace(/projectName:\s*null/, `projectName: "${projectName}"`)

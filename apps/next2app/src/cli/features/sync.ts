@@ -1,4 +1,4 @@
-import { doctor } from "../commands/doctor";
+import { doctor } from "../commands/doctor.js";
 
 import fs from "fs-extra";
 import path from "path";
@@ -6,7 +6,6 @@ import { PATHS } from "../utils/path.js";
 import { FILE_NAMES } from "../config/constants.js";
 
 export const syncExpoProject = async () => {
-  await doctor();
   await syncExpoConfigWithN2A();
   await copyAssetsToExpo();
 };
@@ -14,9 +13,8 @@ export const syncExpoProject = async () => {
 // Sync Expo config with N2A config
 export const syncExpoConfigWithN2A = async () => {
   // read N2A config
-  const {
-    default: { projectName, appId, displayName, design, scheme },
-  } = await import(PATHS.N2A.CONFIG_FILE);
+  const config = await import(PATHS.N2A.CONFIG_FILE);
+  const { projectName, appId, displayName, design, scheme } = config.default;
 
   // read Expo config
   const { ROOT: EXPO_ROOT } = await PATHS.getExpoPaths();

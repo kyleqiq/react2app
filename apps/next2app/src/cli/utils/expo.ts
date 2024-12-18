@@ -164,6 +164,7 @@ export const updateExpoEnvFile = async (env: Record<string, string>) => {
   const { ENV_FILE } = await PATHS.getExpoPaths();
   await updateEnvFile(ENV_FILE, env);
 };
+
 export async function validateExpoProject(config: N2AConfig) {
   // Check if Expo project exists
   const projectExists = await checkExpoProjectExist();

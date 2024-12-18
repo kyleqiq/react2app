@@ -12,6 +12,7 @@ import { frameworks } from "../config/frameworks.js";
 import { initN2A } from "../features/init.js";
 import { PATHS, validateProjectRoot } from "../utils/path.js";
 import { syncExpoProject } from "../features/sync.js";
+import { doctor } from "./doctor.js";
 
 export const dev = async (
   platform: string,
@@ -25,6 +26,7 @@ export const dev = async (
     if (isFirstExecution) {
       await initN2A({ isDevMode: options.dev });
     } else {
+      await doctor();
       await syncExpoProject();
     }
 

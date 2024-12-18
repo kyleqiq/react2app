@@ -52,8 +52,11 @@ export const createN2AConfig = async (
     await fs.copyFile(templatePath, destinationPath);
     const { default: createdConfig } = await import(destinationPath);
     return createdConfig;
-  } catch (error) {
-    throw new Error(`Failed to create config file: ${error.message}`);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to create config file: ${error.message}`);
+    }
+    throw new Error(`Unknown error occurred while creating config file`);
   }
 };
 
