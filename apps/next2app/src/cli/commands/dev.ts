@@ -13,6 +13,7 @@ import { frameworks } from "../config/frameworks.js";
 import { initN2AProject } from "../utils/init.js";
 import { PATHS, validateProjectRoot } from "../utils/path.js";
 import { syncN2AConfigWithExpo } from "../utils/sync.js";
+import { sync } from "../features/sync.js";
 
 export const dev = async (
   platform: string,
@@ -29,8 +30,7 @@ export const dev = async (
     if (isFirstExecution) {
       await initN2AProject({ isDevMode: options.dev });
     } else {
-      await doctor();
-      await syncN2AConfigWithExpo();
+      await sync();
     }
 
     const ipAddress = getLocalIPAddress();
