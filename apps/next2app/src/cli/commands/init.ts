@@ -1,11 +1,9 @@
-import { cleanupN2A } from "../utils/cleanUp.js";
-import { initN2AProject } from "../utils/init.js";
+import { initN2A } from "../features/init.js";
 
 export const init = async () => {
   try {
-    await initN2AProject();
+    await initN2A();
   } catch (error) {
-    cleanupN2A();
     throw error;
   }
 };

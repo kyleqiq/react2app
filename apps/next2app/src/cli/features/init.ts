@@ -1,35 +1,31 @@
 import { createExpoEnvFile, createExpoProject } from "../utils/expo.js";
-import { createN2AConfig } from "./config.js";
-import { updateEnvFile } from "./env.js";
-import { PATHS } from "./path.js";
+import { createN2AConfig } from "../utils/config.js";
+import { updateEnvFile } from "../utils/env.js";
+import { PATHS } from "../utils/path.js";
 import Conf from "conf";
-import { convertPackageNameToAppId } from "./packageName.js";
-import { convertPackageNameToDisplayName } from "./packageName.js";
-import { convertPackageNameToProjectName } from "./packageName.js";
+import { convertPackageNameToAppId } from "../utils/packageName.js";
+import { convertPackageNameToDisplayName } from "../utils/packageName.js";
+import { convertPackageNameToProjectName } from "../utils/packageName.js";
 import fs from "fs-extra";
-import { syncN2AConfigWithExpo } from "./sync.js";
-import { addAppLayout } from "./ux.js";
+import { addAppLayout } from "../utils/ux.js";
 import { FILE_NAMES } from "../config/constants.js";
+import { syncExpoProject } from "./sync.js";
 
-interface InitN2AProjectOptions {
+interface InitN2AOptions {
   isDevMode?: boolean;
 }
 
-const DEFAULT_OPTIONS: InitN2AProjectOptions = {
-  isDevMode: false,
-};
-
-export const initN2AProject = async (
-  options: InitN2AProjectOptions = DEFAULT_OPTIONS
+export const initN2A = async (
+  options: InitN2AOptions = {
+    isDevMode: false,
+  }
 ) => {
   try {
-    // Setup N2A config
+    // Setup Next.js N2A config file
     await createN2AConfig();
-
-    // Create value based on user's package name
-    const projectRoot = PATHS.PROJECT_ROOT;
+    // - Update config values based on package name in package.json
     const packageJson = new Conf({
-      cwd: projectRoot,
+      cwd: PATHS.PROJECT_ROOT,
       configName: "package",
       fileExtension: "json",
     });
@@ -37,14 +33,10 @@ export const initN2AProject = async (
     const projectName = convertPackageNameToProjectName(packageName);
     const displayName = convertPackageNameToDisplayName(packageName);
     const appId = convertPackageNameToAppId(packageName);
-
-    // Update N2A config
-    const { default: N2AConfig } = await import(PATHS.N2A.CONFIG_FILE);
-    N2AConfig.projectName = projectName;
-    N2AConfig.displayName = displayName;
-    N2AConfig.appId = appId;
-
-    // Read the template file first
+    // const { default: N2AConfig } = await import(PATHS.N2A.CONFIG_FILE);
+    // N2AConfig.projectName = projectName;
+    // N2AConfig.displayName = displayName;
+    // N2AConfig.appId = appId;
     const template = await fs.readFile(PATHS.CLI.CONFIG_TEMPLATE, "utf-8");
     const configContent = template
       .replace(/projectName:\s*null/, `projectName: "${projectName}"`)
@@ -52,13 +44,16 @@ export const initN2AProject = async (
       .replace(/appId:\s*null/, `appId: "${appId}"`);
     await fs.writeFile(PATHS.N2A.CONFIG_FILE, configContent);
 
-    // Update Next.js project .env.local file
+    // Setup Next.js .env.local file
     await fs.ensureFile(PATHS.NEXTJS.ENV_FILE);
     await updateEnvFile(PATHS.NEXTJS.ENV_FILE, {
       N2A_IOS_TEAM_ID: "PUT_YOUR_TEAM_ID_HERE",
       N2A_ANDROID_KEYSTORE_PASSWORD: "PUT_YOUR_KEYSTORE_PASSWORD_HERE",
       N2A_ANDROID_KEY_PASSWORD: "PUT_YOUR_KEY_PASSWORD_HERE",
     });
+
+    // Setup Next.js UX related files
+    await addAppLayout();
 
     // Setup Expo project
     await createExpoProject({
@@ -67,14 +62,8 @@ export const initN2AProject = async (
         ? PATHS.DEV_EXPO_TEMPLATE
         : FILE_NAMES.EXPO.TEMPLATE,
     });
-
-    await syncN2AConfigWithExpo();
-
-    // Setup Expo env file
     await createExpoEnvFile();
-
-    // Add <AppLayout> to the root of the project
-    await addAppLayout();
+    await syncExpoProject();
   } catch (error) {
     throw error;
   }

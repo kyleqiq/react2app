@@ -30,16 +30,30 @@ export async function loadN2AConfig(): Promise<N2AConfig | null> {
   }
 }
 
-export const createN2AConfig = async (): Promise<N2AConfig> => {
+interface CreateN2AConfigOptions {
+  destinationPath: string;
+  templatePath: string;
+}
+/**
+ * Creates a new next2app configuration file
+ * @returns {Promise<N2AConfig>} The created configuration
+ */
+export const createN2AConfig = async (
+  { templatePath, destinationPath }: CreateN2AConfigOptions = {
+    templatePath: PATHS.CLI.CONFIG_TEMPLATE,
+    destinationPath: PATHS.N2A.CONFIG_FILE,
+  }
+): Promise<N2AConfig> => {
   try {
-    const templatePath = PATHS.CLI.CONFIG_TEMPLATE;
-    const configPath = PATHS.N2A.CONFIG_FILE;
-    await fs.ensureFileSync(configPath);
-    await fs.copyFileSync(templatePath, configPath);
-    const { default: createdConfig } = await import(configPath);
+    if (await fs.pathExists(destinationPath)) {
+      throw new Error(`Config file already exists at: ${destinationPath}`);
+    }
+    await fs.ensureFile(destinationPath);
+    await fs.copyFile(templatePath, destinationPath);
+    const { default: createdConfig } = await import(destinationPath);
     return createdConfig;
   } catch (error) {
-    throw error;
+    throw new Error(`Failed to create config file: ${error.message}`);
   }
 };
 
