@@ -38,7 +38,7 @@ export interface N2ADevServerConfig {
   appServer: DevServerConfig;
 }
 
-const printDevServerInfo = (
+export const printDevServerInfo = (
   webServerAddress: ServerAddress,
   appServerAddress: ServerAddress
 ) => {
@@ -86,6 +86,7 @@ export class DevServer {
     this.command = config.command;
     this.address = config.address;
     this.log = config.log;
+    this.setupKillHandlers();
   }
 
   getServerAddress(): ServerAddress {
@@ -187,7 +188,10 @@ export class DevServer {
   }
 
   kill(): void {
-    this.process?.kill();
+    if (this.process) {
+      this.process.kill();
+      this.process = undefined;
+    }
   }
 
   async getEnv() {
@@ -202,6 +206,16 @@ export class DevServer {
       ...env,
     };
   }
+
+  private setupKillHandlers(): void {
+    const cleanup = () => {
+      this.kill();
+      process.exit(0);
+    };
+
+    process.on("SIGINT", cleanup);
+    process.on("SIGTERM", cleanup);
+  }
 }
 
 export async function runDevServer(n2aServerConfig: N2ADevServerConfig) {
@@ -209,12 +223,6 @@ export async function runDevServer(n2aServerConfig: N2ADevServerConfig) {
     const webServer = new DevServer(n2aServerConfig.webServer);
     const appServer = new DevServer(n2aServerConfig.appServer);
     await Promise.all([webServer.start(), appServer.start()]);
-
-    printDevServerInfo(
-      webServer.getServerAddress(),
-      appServer.getServerAddress()
-    );
-    setupServerKill(webServer, appServer);
   } catch (error) {
     logger.error("Failed to start development servers");
     if (error instanceof Error) {
@@ -226,17 +234,6 @@ export async function runDevServer(n2aServerConfig: N2ADevServerConfig) {
 
 export async function installNativeApp(platform: "ios" | "android") {
   await spawn("npx", ["expo", "run:" + platform, "--device"]);
-}
-
-function setupServerKill(webServer: DevServer, appServer: DevServer): void {
-  const cleanup = () => {
-    webServer.kill();
-    appServer.kill();
-    process.exit(0);
-  };
-
-  process.on("SIGINT", cleanup);
-  process.on("SIGTERM", cleanup);
 }
 
 interface SetServerAddressOptions {

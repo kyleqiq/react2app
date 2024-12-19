@@ -3,6 +3,7 @@
 import { DevCommandOptions } from "../types/index.js";
 import {
   getDevServer,
+  printDevServerInfo,
   runDevServer,
   setAppServerAddress,
   setWebServerAddress,
@@ -57,6 +58,7 @@ export const dev = async (
       webServer,
       appServer,
     });
+    printDevServerInfo(webServer.address, appServer.address);
   } catch (error) {
     if (error instanceof Error) {
       logger.error(error.message);
