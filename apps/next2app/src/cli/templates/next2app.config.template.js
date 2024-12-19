@@ -16,10 +16,10 @@ const config = {
     },
   },
   design: {
-    icon: "./assets/images/icon.png",
+    icon: "./next2app/design/icon.png",
     splash: {
       backgroundColor: "#ffffff",
-      image: "./assets/images/splash.png",
+      image: "./next2app/design/splash.png",
       imageWidth: 200,
     },
   },

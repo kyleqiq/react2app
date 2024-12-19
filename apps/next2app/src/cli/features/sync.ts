@@ -62,9 +62,16 @@ export const copyAssetsToExpo = async () => {
   // copy design assets to Expo
   const iconPath = path.join(PATHS.NEXTJS.ROOT, design.icon);
   const splashPath = path.join(PATHS.NEXTJS.ROOT, design.splash.image);
-  await fs.copy(iconPath, path.join(EXPO_ROOT, "assets", "images", "icon.png"));
-  await fs.copy(
-    splashPath,
-    path.join(EXPO_ROOT, "assets", "images", "splash.png")
-  );
+  if (fs.existsSync(iconPath)) {
+    await fs.copy(
+      iconPath,
+      path.join(EXPO_ROOT, "assets", "images", "icon.png")
+    );
+  }
+  if (fs.existsSync(splashPath)) {
+    await fs.copy(
+      splashPath,
+      path.join(EXPO_ROOT, "assets", "images", "splash.png")
+    );
+  }
 };
