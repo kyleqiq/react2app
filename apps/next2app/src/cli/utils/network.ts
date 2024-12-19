@@ -1,5 +1,6 @@
 import { networkInterfaces } from "os";
 import { logger } from "./logger.js";
+import getPort from "get-port";
 
 export const getLocalIPAddress = (): string => {
   const nets = networkInterfaces();
@@ -27,4 +28,21 @@ export const validatePort = (port: number | undefined) => {
     return false;
   }
   return true;
+};
+
+export const getAvailableAddress = async ({
+  preferredHost,
+  preferredPort,
+  alternativePorts,
+}: {
+  preferredHost?: string;
+  preferredPort?: number;
+  alternativePorts?: number[];
+}) => {
+  const ipAddress = getLocalIPAddress();
+  const host = preferredHost || ipAddress;
+  const port = await getPort({
+    port: preferredPort || alternativePorts,
+  });
+  return { host, port };
 };

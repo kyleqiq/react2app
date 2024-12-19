@@ -2,17 +2,28 @@
 import chalk from "chalk";
 import getPort from "get-port";
 import { DevCommandOptions } from "../types/index.js";
-import { runDevServer } from "../utils/devServer.js";
+import {
+  runDevServer,
+  setAppServerAddress,
+  setWebServerAddress,
+} from "../utils/devServer.js";
 import { logger } from "../utils/logger.js";
 import { loadN2AConfig as loadN2AConfig } from "../utils/config.js";
 import { updateExpoEnvFile } from "../utils/expo.js";
 import { cleanupN2A } from "../utils/cleanUp.js";
-import { getLocalIPAddress, validatePort } from "../utils/network.js";
+import {
+  getAvailableAddress,
+  getLocalIPAddress,
+  validatePort,
+} from "../utils/network.js";
 import { frameworks } from "../config/frameworks.js";
 import { initN2A } from "../features/init.js";
 import { PATHS, validateProjectRoot } from "../utils/path.js";
 import { syncExpoProject } from "../features/sync.js";
 import { doctor } from "./doctor.js";
+import { EXPO_PORTS, WEB_PORTS } from "../config/constants.js";
+import { saveToSystemFile } from "../utils/system.js";
+import Conf from "conf";
 
 export const dev = async (
   platform: string,
@@ -30,18 +41,13 @@ export const dev = async (
       await syncExpoProject();
     }
 
-    const ipAddress = getLocalIPAddress();
-    const webHost = options.host || ipAddress;
-    const webPort = await getPort({
-      port: options.port || [3000, 3001, 3002, 3003, 3004, 3005, 3006, 3007],
-    });
-    const expoHost = options.host || ipAddress;
-    const expoPort = await getPort({
-      port: options.port || [8081, 8082, 8083, 8084, 8085, 8086, 8087, 8088],
+    const { host: webHost, port: webPort } = await setWebServerAddress({
+      preferredHost: options.host,
+      preferredPort: options.port,
     });
 
-    await updateExpoEnvFile({
-      EXPO_PUBLIC_WEBVIEW_URL: `http://${webHost}:${webPort}`,
+    const { host: expoHost, port: expoPort } = await setAppServerAddress({
+      preferredHost: options.host,
     });
 
     runDevServer({
@@ -65,7 +71,6 @@ export const dev = async (
   } catch (error) {
     if (error instanceof Error) {
       logger.error(error.message);
-      await cleanupN2A();
     }
   }
 };

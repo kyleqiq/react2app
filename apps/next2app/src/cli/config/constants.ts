@@ -9,6 +9,7 @@ export const FILE_NAMES = {
   N2A: {
     CONFIG: "next2app.config.js",
     CONFIG_TEMPLATE: "next2app.config.template.js",
+    SYSTEM: ".server.json",
   },
   NEXTJS: {
     ENV: ".env.local",
@@ -26,3 +27,6 @@ export const FILE_NAMES = {
     KEY_ALIAS: "upload",
   },
 } as const;
+
+export const WEB_PORTS = [3000, 3001, 3002, 3003, 3004, 3005, 3006, 3007];
+export const EXPO_PORTS = [8081, 8082, 8083, 8084, 8085, 8086, 8087, 8088];

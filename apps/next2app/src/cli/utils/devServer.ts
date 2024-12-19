@@ -8,6 +8,10 @@ import type {
 } from "../types/framework.js";
 import { logger } from "./logger.js";
 import qrcode from "qrcode-terminal";
+import { getAvailableAddress } from "./network.js";
+import { saveToSystemFile } from "./system.js";
+import { updateExpoEnvFile } from "./expo.js";
+import { EXPO_PORTS, WEB_PORTS } from "../config/constants.js";
 
 interface ServerInfo {
   host: string;
@@ -196,6 +200,10 @@ export async function runDevServer(options: N2ADevServerOptions) {
   }
 }
 
+export async function installNativeApp(platform: "ios" | "android") {
+  await spawn("npx", ["expo", "run:" + platform, "--device"]);
+}
+
 function setupServerKill(webServer: DevServer, appServer: DevServer): void {
   const cleanup = () => {
     webServer.kill();
@@ -206,3 +214,47 @@ function setupServerKill(webServer: DevServer, appServer: DevServer): void {
   process.on("SIGINT", cleanup);
   process.on("SIGTERM", cleanup);
 }
+
+interface SetServerAddressOptions {
+  preferredHost?: string;
+  preferredPort?: number;
+}
+
+export const setWebServerAddress = async ({
+  preferredHost,
+  preferredPort,
+}: SetServerAddressOptions) => {
+  const { host, port } = await getAvailableAddress({
+    preferredHost,
+    preferredPort,
+    alternativePorts: WEB_PORTS,
+  });
+  await saveToSystemFile({
+    webServer: {
+      lastHost: host,
+      lastPort: port,
+    },
+  });
+  await updateExpoEnvFile({
+    EXPO_PUBLIC_WEBVIEW_URL: `http://${host}:${port}`,
+  });
+  return { host, port };
+};
+
+export const setAppServerAddress = async ({
+  preferredHost,
+  preferredPort,
+}: SetServerAddressOptions) => {
+  const { host, port } = await getAvailableAddress({
+    preferredHost,
+    preferredPort,
+    alternativePorts: EXPO_PORTS,
+  });
+  await saveToSystemFile({
+    appServer: {
+      lastHost: host,
+      lastPort: port,
+    },
+  });
+  return { host, port };
+};
