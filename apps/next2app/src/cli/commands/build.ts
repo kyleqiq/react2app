@@ -1,7 +1,8 @@
 import inquirer from "inquirer";
 import inquirerAutocomplete from "inquirer-autocomplete-prompt";
 import { logger } from "../utils/logger.js";
-import { PLATFORM, Platform } from "../constants/index.js";
+import { PLATFORM } from "../constants/index.js";
+import { Platform } from "../types/index.js";
 import { ensureRequiredProgramInstalled, runSpawn } from "../utils/program.js";
 import { PATHS } from "../utils/path.js";
 import { BuildCommandOptions } from "../types/index.js";
@@ -76,10 +77,10 @@ export const build = async (
     await ensureRequiredProgramInstalled(requiredPrograms);
 
     // Build app
-    if (platform === PLATFORM.IOS || platform === PLATFORM.ALL) {
+    if (platform === PLATFORM.IOS) {
       await buildIOS();
     }
-    if (platform === PLATFORM.ANDROID || platform === PLATFORM.ALL) {
+    if (platform === PLATFORM.ANDROID) {
       await buildAndroid();
     }
   } catch (error) {

@@ -1,13 +1,14 @@
 import { spawn, type ChildProcess } from "child_process";
 import chalk from "chalk";
 import { BaseError } from "../errors/index.js";
-import type { CommandConfig } from "../types/index.js";
+import type { CommandConfig, Platform } from "../types/index.js";
 import { logger } from "./logger.js";
 import qrcode from "qrcode-terminal";
 import { getAvailableAddress } from "./network.js";
 import { saveToSystemFile } from "./system.js";
 import { updateExpoEnvFile } from "./expo.js";
 import { EXPO_PORTS, WEB_PORTS } from "../config/constants.js";
+import { GetCommandConfigOptions } from "../config/devServer.js";
 
 export interface DevServerConfig {
   name: string;
@@ -29,8 +30,9 @@ export interface LogConfig {
 }
 
 export interface ServerCommandConfig {
-  getCommandConfig: (options: ServerAddress) => Promise<CommandConfig>;
+  runCommand: (options: GetCommandConfigOptions) => Promise<ChildProcess>;
   readyMessage: string;
+  platform?: Platform;
 }
 
 export interface N2ADevServerConfig {
@@ -102,20 +104,11 @@ export class DevServer {
 
   async start(): Promise<void> {
     try {
-      const { command, args, env, cwd } = await this.command.getCommandConfig({
-        host: this.address.host,
-        port: this.address.port,
-      });
-
-      await new Promise<void>((resolve, reject) => {
-        this.process = spawn(command, args, {
-          stdio: "pipe",
-          shell: false,
-          env: {
-            ...process.env,
-            ...env,
-          },
-          cwd,
+      await new Promise<void>(async (resolve, reject) => {
+        this.process = await this.command.runCommand({
+          host: this.address.host,
+          port: this.address.port,
+          platform: this.command.platform,
         });
         this.setupLogging();
         this.setupErrorHandling(reject);
@@ -195,15 +188,10 @@ export class DevServer {
   }
 
   async getEnv() {
-    const { env } = await this.command.getCommandConfig({
-      host: this.address.host,
-      port: this.address.port,
-    });
     const port = this.address.port ?? 3000;
     return {
       PORT: port.toString(),
       ...process.env,
-      ...env,
     };
   }
 
@@ -280,20 +268,25 @@ export const setAppServerAddress = async ({
   return { host, port };
 };
 
-export const getDevServer = ({
+export const getDevServerConfig = ({
   server,
   host,
   port,
-  verbose,
+  verbose = false,
+  platform,
 }: {
   server: Omit<DevServerConfig, "address">;
   host: string;
   port: number;
-  verbose: boolean;
+  verbose?: boolean;
+  platform?: Platform;
 }) => {
   return {
     name: server.name,
-    command: server.command,
+    command: {
+      platform,
+      ...server.command,
+    },
     address: {
       scheme: "http",
       host: host,

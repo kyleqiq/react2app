@@ -26,20 +26,16 @@ program
   .option("-H, --host <host>", "Web server host")
   .option("-p, --port <port>", "Web server port")
   .option("-D, --dev", "Use local development template (For contributors)")
-  .action(
-    async (platform: Platform = PLATFORM.ALL, options: DevCommandOptions) => {
-      dev(platform, options);
-    }
-  );
+  .action(async (platform: Platform, options: DevCommandOptions) => {
+    dev(platform, options);
+  });
 
 program
   .command("build [platform]")
   .description("Build for production")
-  .action(
-    async (platform: Platform = PLATFORM.ALL, options: BuildCommandOptions) => {
-      build(platform, options);
-    }
-  );
+  .action(async (platform: Platform, options: BuildCommandOptions) => {
+    build(platform, options);
+  });
 program.command("deploy").description("Deploy application").action(deploy);
 program.command("doctor").description("Check for issues").action(doctor);
 program.command("clean").description("Clean up").action(clean);
