@@ -2,7 +2,7 @@ import fs from "fs-extra";
 import path from "path";
 import { PATHS } from "./path.js";
 import { runSpawn } from "./program.js";
-import { Platform } from "../constants/index.js";
+import { Platform } from "../types/index.js";
 
 export const copyFastLaneConfig = async (
   destinationPath: string,

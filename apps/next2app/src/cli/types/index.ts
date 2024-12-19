@@ -1,4 +1,4 @@
-import { FRAMEWORK, PLATFORM } from "../constants";
+import { FRAMEWORK, PLATFORM } from "../constants/index.js";
 
 export interface CommandOptions {}
 

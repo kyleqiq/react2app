@@ -10,7 +10,7 @@ import {
   DevCommandOptions,
 } from "../src/cli/types/index.js";
 import { init } from "../src/cli/commands/init.js";
-import { PLATFORM, Platform } from "../src/cli/constants/index.js";
+import { Platform } from "../src/cli/types/index.js";
 
 const program = new Command();
 
