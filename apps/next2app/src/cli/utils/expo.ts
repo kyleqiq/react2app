@@ -9,7 +9,6 @@ import { ERROR_CODE } from "../errors/index.js";
 import { ERROR_MESSAGES } from "../errors/index.js";
 import { ExpoError } from "../errors/index.js";
 import { FILE_NAMES } from "../config/constants.js";
-import path from "path";
 
 /**
  * Checks if an Expo project exists in the current directory

@@ -1,11 +1,7 @@
 import { spawn, type ChildProcess } from "child_process";
 import chalk from "chalk";
 import { BaseError } from "../errors/index.js";
-import type {
-  FrameworkConfig,
-  DevServerOptions,
-  N2ADevServerOptions,
-} from "../types/framework.js";
+import type { CommandConfig } from "../types/index.js";
 import { logger } from "./logger.js";
 import qrcode from "qrcode-terminal";
 import { getAvailableAddress } from "./network.js";
@@ -13,14 +9,40 @@ import { saveToSystemFile } from "./system.js";
 import { updateExpoEnvFile } from "./expo.js";
 import { EXPO_PORTS, WEB_PORTS } from "../config/constants.js";
 
-interface ServerInfo {
-  host: string;
-  port: number;
-  scheme?: string;
+export interface DevServerConfig {
+  name: string;
+  command: ServerCommandConfig;
+  address: ServerAddress;
+  log: LogConfig;
 }
 
-const printDevServerInfo = (webServer: ServerInfo, appServer: ServerInfo) => {
-  const formatUrl = (server: ServerInfo) =>
+export interface ServerAddress {
+  scheme?: string;
+  host: string;
+  port: number;
+}
+
+export interface LogConfig {
+  logPrefix: string;
+  logColor: typeof chalk;
+  verbose?: boolean;
+}
+
+export interface ServerCommandConfig {
+  getCommandConfig: (options: ServerAddress) => Promise<CommandConfig>;
+  readyMessage: string;
+}
+
+export interface N2ADevServerConfig {
+  webServer: DevServerConfig;
+  appServer: DevServerConfig;
+}
+
+const printDevServerInfo = (
+  webServerAddress: ServerAddress,
+  appServerAddress: ServerAddress
+) => {
+  const formatServerAddress = (server: ServerAddress) =>
     server.scheme
       ? `${server.scheme}://${server.host}:${server.port}`
       : `${server.host}:${server.port}`;
@@ -28,14 +50,16 @@ const printDevServerInfo = (webServer: ServerInfo, appServer: ServerInfo) => {
   const messages = [
     "",
     chalk.green("🚀 Server is running at:\n"),
-    chalk.blue(`  Web: ${formatUrl(webServer)}`),
-    chalk.blue(`  App: ${formatUrl(appServer)}`),
+    chalk.blue(`  Web: ${formatServerAddress(webServerAddress)}`),
+    chalk.blue(`  App: ${formatServerAddress(appServerAddress)}`),
     "",
   ];
   messages.forEach((msg) => console.log(msg));
 
   // For Expo QR code, we specifically need the exp:// scheme
-  qrcode.generate(`exp://${appServer.host}:${appServer.port}`, { small: true });
+  qrcode.generate(`exp://${appServerAddress.host}:${appServerAddress.port}`, {
+    small: true,
+  });
 
   const instructions = [
     "",
@@ -49,52 +73,48 @@ const printDevServerInfo = (webServer: ServerInfo, appServer: ServerInfo) => {
 };
 
 export class DevServer {
-  private process?: ChildProcess;
-  private isReady = false;
-  private scheme = "http";
-  private host?: string;
-  private port?: number;
-  private framework: FrameworkConfig;
-  private options: DevServerOptions;
-  private logColor: typeof chalk;
-  private cwd?: string;
+  private readonly name: string;
+  private readonly command: ServerCommandConfig;
+  private readonly address: ServerAddress;
+  private readonly log: LogConfig;
 
-  constructor(options: DevServerOptions) {
-    this.framework = options.framework;
-    this.options = options;
-    this.logColor = options.logColor || chalk.blue;
-    this.host = options.host;
-    this.port = options.port;
-    this.cwd = options.cwd;
+  private isReady = false;
+  private process?: ChildProcess;
+
+  constructor(config: DevServerConfig) {
+    this.name = config.name;
+    this.command = config.command;
+    this.address = config.address;
+    this.log = config.log;
   }
 
-  getServerInfo(): ServerInfo {
-    if (!this.host || !this.port) {
+  getServerAddress(): ServerAddress {
+    if (!this.address.host || !this.address.port) {
       throw new Error("Error while getting server info: Server not started");
     }
     return {
-      host: this.host,
-      port: this.port,
-      scheme: this.scheme,
+      host: this.address.host,
+      port: this.address.port,
+      scheme: this.address.scheme,
     };
   }
 
   async start(): Promise<void> {
     try {
-      const devCommand = await this.framework.getDevCommand({
-        host: this.host,
-        port: this.port,
+      const { command, args, env, cwd } = await this.command.getCommandConfig({
+        host: this.address.host,
+        port: this.address.port,
       });
 
       await new Promise<void>((resolve, reject) => {
-        this.process = spawn(devCommand.command, devCommand.args, {
+        this.process = spawn(command, args, {
           stdio: "pipe",
           shell: false,
           env: {
             ...process.env,
-            ...devCommand.env,
+            ...env,
           },
-          cwd: this.cwd,
+          cwd,
         });
         this.setupLogging();
         this.setupErrorHandling(reject);
@@ -106,25 +126,24 @@ export class DevServer {
       const isPermissionError = errorMessage.includes("EACCES");
 
       throw new BaseError(
-        `Failed to start ${this.framework.name} server`,
+        `Failed to start server (${this.name})`,
         "SERVER_START_FAILED",
         isPermissionError
-          ? `Permission denied for port ${this.port}. Please use a port number above 1024.`
+          ? `Permission denied for port ${this.address.port}. Please use a port number above 1024.`
           : errorMessage
       );
     }
   }
 
   private setupLogging(): void {
+    const { logPrefix, logColor, verbose } = this.log;
     this.process?.stdout?.on("data", (data) => {
       const message = data.toString();
-      if (this.isReady || this.options.debug) {
+      if (this.isReady || verbose) {
         const lines = message
           .split("\n")
           .map((line: string) =>
-            line.trim()
-              ? `${this.logColor(this.framework.logPrefix)} ${line}`
-              : line
+            line.trim() ? `${logColor(logPrefix)} ${line}` : line
           )
           .join("\n");
         process.stdout.write(lines);
@@ -132,39 +151,35 @@ export class DevServer {
     });
 
     this.process?.stderr?.on("data", (data) => {
-      if (this.options.debug) {
+      if (verbose) {
         const message = data.toString();
-        process.stderr.write(
-          chalk.red(`${this.framework.logPrefix} ${message}`)
-        );
+        process.stderr.write(chalk.red(`${logPrefix} ${message}`));
       }
     });
   }
 
   private setupErrorHandling(reject: (reason?: any) => void): void {
     this.process?.on("error", (error) => {
-      logger.error(`${this.framework.name} server failed: ${error.message}`);
+      logger.error(`${this.name} server failed: ${error.message}`);
       reject(error);
     });
   }
 
   private waitForReady(resolve: () => void): void {
-    if (this.options.debug) {
+    const { logPrefix, logColor, verbose } = this.log;
+    if (verbose) {
       logger.info(
-        `${this.framework.logPrefix} Waiting for ready message: "${this.framework.readyMessage}"`,
-        this.logColor
+        `${logPrefix} Waiting for ready message: "${this.command.readyMessage}"`,
+        logColor
       );
     }
 
     this.process?.stdout?.on("data", (data) => {
       const message = data.toString();
-      if (message.includes(this.framework.readyMessage)) {
+      if (message.includes(this.command.readyMessage)) {
         this.isReady = true;
-        if (this.options.debug) {
-          logger.info(
-            `${this.framework.logPrefix} Server is ready!`,
-            this.logColor
-          );
+        if (verbose) {
+          logger.info(`${logPrefix} Server is ready!`, logColor);
         }
         resolve();
       }
@@ -175,21 +190,30 @@ export class DevServer {
     this.process?.kill();
   }
 
-  getEnv() {
+  async getEnv() {
+    const { env } = await this.command.getCommandConfig({
+      host: this.address.host,
+      port: this.address.port,
+    });
+    const port = this.address.port ?? 3000;
     return {
-      PORT: (this.port ?? 3000).toString(),
+      PORT: port.toString(),
       ...process.env,
-      ...this.framework.env,
+      ...env,
     };
   }
 }
 
-export async function runDevServer(options: N2ADevServerOptions) {
+export async function runDevServer(n2aServerConfig: N2ADevServerConfig) {
   try {
-    const webServer = new DevServer(options.webServer);
-    const appServer = new DevServer(options.appServer);
+    const webServer = new DevServer(n2aServerConfig.webServer);
+    const appServer = new DevServer(n2aServerConfig.appServer);
     await Promise.all([webServer.start(), appServer.start()]);
-    printDevServerInfo(webServer.getServerInfo(), appServer.getServerInfo());
+
+    printDevServerInfo(
+      webServer.getServerAddress(),
+      appServer.getServerAddress()
+    );
     setupServerKill(webServer, appServer);
   } catch (error) {
     logger.error("Failed to start development servers");
@@ -257,4 +281,30 @@ export const setAppServerAddress = async ({
     },
   });
   return { host, port };
+};
+
+export const getDevServer = ({
+  server,
+  host,
+  port,
+  verbose,
+}: {
+  server: Omit<DevServerConfig, "address">;
+  host: string;
+  port: number;
+  verbose: boolean;
+}) => {
+  return {
+    name: server.name,
+    command: server.command,
+    address: {
+      scheme: "http",
+      host: host,
+      port: port,
+    },
+    log: {
+      ...server.log,
+      verbose: verbose,
+    },
+  };
 };

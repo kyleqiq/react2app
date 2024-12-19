@@ -1,9 +1,3 @@
-import type {
-  PackageManager,
-  CommandConfig,
-  DevServerOptions,
-} from "./framework.js";
-
 export interface CommandOptions {}
 
 export interface DevCommandOptions {
@@ -11,7 +5,7 @@ export interface DevCommandOptions {
   packageManager?: PackageManager;
   port?: number; // web server port
   host?: string; // web server host
-  dev?: boolean;
+  verbose?: boolean;
 }
 
 export interface BuildCommandOptions {}
@@ -22,4 +16,11 @@ export interface N2AConfig {
   android: boolean;
 }
 
-export type { PackageManager, CommandConfig, DevServerOptions };
+export interface CommandConfig {
+  command: string;
+  args: string[];
+  env?: Record<string, string>;
+  cwd?: string;
+}
+
+export type PackageManager = "npm" | "yarn" | "pnpm" | "auto";

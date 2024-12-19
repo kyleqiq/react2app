@@ -22,7 +22,7 @@ program
 program
   .command("dev [platform]")
   .description("Transform into app and start development server")
-  .option("-d, --debug", "Show detailed dev server logs for debugging")
+  .option("-v, --verbose", "Show detailed dev server logs for debugging")
   .option("-H, --host <host>", "Web server host")
   .option("-p, --port <port>", "Web server port")
   .option("-D, --dev", "Use local development template (For contributors)")
