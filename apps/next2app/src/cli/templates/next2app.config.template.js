@@ -2,6 +2,7 @@ const config = {
   projectName: null,
   displayName: null,
   appId: null,
+  productionUrl: "https://example.com",
   version: "1.0.0",
   scheme: "yourscheme",
   ios: {

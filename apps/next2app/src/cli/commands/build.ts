@@ -14,6 +14,7 @@ import {
 } from "../config/programs.js";
 import { ensureN2AKeyStore, setSDKLocation } from "../utils/android.js";
 import { copyFastLaneConfig, runFastlaneBuild } from "../utils/fastlane.js";
+import { updateExpoEnvFile } from "../utils/expo.js";
 
 // Register the autocomplete prompt
 inquirer.registerPrompt("autocomplete", inquirerAutocomplete);
@@ -74,6 +75,12 @@ export const build = async (
       requiredPrograms.push(...ANDROID_REQUIRED_PROGRAMS);
     }
     await ensureRequiredProgramInstalled(requiredPrograms);
+
+    // set production url
+    const { default: N2AConfig } = await import(PATHS.N2A.CONFIG_FILE);
+    await updateExpoEnvFile({
+      EXPO_PUBLIC_WEBVIEW_URL: N2AConfig.productionUrl,
+    });
 
     // Build app
     if (platform === PLATFORM.IOS) {

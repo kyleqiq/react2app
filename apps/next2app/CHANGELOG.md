@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.2] - 2024-12-22
+
+### CHANGED
+
+- MINOR productionUrl is added to next2app.config.js.
+
 ## [0.5.1] - 2024-12-22
 
 ### CHANGED
