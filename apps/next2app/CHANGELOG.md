@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.1] - 2024-12-22
+
+### CHANGED
+
+- MINOR some build errors & package import errors are fixed.
+
 ## [0.5.0] - 2024-12-19
 
 ### Added

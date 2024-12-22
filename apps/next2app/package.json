@@ -1,6 +1,6 @@
 {
   "name": "next2app",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "type": "module",
   "bin": {
     "next2app": "./dist/bin/index.js"
