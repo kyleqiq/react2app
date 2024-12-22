@@ -14,7 +14,8 @@ export const syncExpoProject = async () => {
 export const syncExpoConfigWithN2A = async () => {
   // read N2A config
   const config = await import(PATHS.N2A.CONFIG_FILE);
-  const { projectName, appId, displayName, design, scheme } = config.default;
+  const { projectName, displayName, appId, design, scheme, version } =
+    config.default;
 
   // read Expo config
   const { ROOT: EXPO_ROOT } = await PATHS.getExpoPaths();
@@ -28,6 +29,7 @@ export const syncExpoConfigWithN2A = async () => {
       ...existingConfig.expo,
       name: displayName,
       slug: projectName,
+      version,
       scheme,
       ios: {
         ...existingConfig.expo?.ios,
