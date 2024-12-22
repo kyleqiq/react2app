@@ -51,7 +51,6 @@ const buildAndroid = async () => {
   await copyFastLaneConfig(expoPaths.ANDROID.ROOT);
 
   const keyStore = await ensureN2AKeyStore();
-  console.log(keyStore);
   await runFastlaneBuild(PLATFORM.ANDROID, expoPaths.ANDROID.ROOT, {
     ...process.env,
     KEYSTORE_PATH: keyStore.keyStorePath,

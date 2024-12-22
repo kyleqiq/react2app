@@ -51,7 +51,6 @@ export const dev = async (
       });
       const webServer = new DevServer(webServerConfig);
       await webServer.start();
-      console.log("webserver started");
 
       // start app install server
       const appInstallServerConfig = getDevServerConfig({
@@ -63,6 +62,7 @@ export const dev = async (
       });
       const appInstallServer = new DevServer(appInstallServerConfig);
       await appInstallServer.start();
+      return;
     }
     if (platform === PLATFORM.ANDROID) {
       // android advanced mode

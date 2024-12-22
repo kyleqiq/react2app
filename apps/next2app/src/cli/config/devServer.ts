@@ -56,6 +56,7 @@ export const DEV_SERVERS = {
               },
             }
           );
+
           return serverProcess;
         },
         readyMessage: "Logs for your project will appear below",
@@ -82,9 +83,10 @@ export const DEV_SERVERS = {
               },
             }
           );
+
           return serverProcess;
         },
-        readyMessage: "✔ Complete 100%",
+        readyMessage: "✔ Installing 100%",
       },
       log: {
         logPrefix: "[App]",
