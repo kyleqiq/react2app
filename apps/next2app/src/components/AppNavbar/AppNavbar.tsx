@@ -8,7 +8,7 @@ import { insets } from "../AppLayout/AppLayout.js";
 
 interface Tab {
   path: string;
-  icon: React.ReactNode;
+  icon: React.ReactElement;
   onClick?: () => void;
 }
 export default function AppNavbar({
@@ -38,20 +38,24 @@ export default function AppNavbar({
     >
       {tabs.map((tab, index) => {
         return (
-          <Link
-            key={index}
-            href={tab.path}
-            onClick={tab.onClick}
-            className={classNames(
-              "flex items-center justify-center w-[48px] h-full active:text-blue-600",
-              tab.path === pathname ? "text-blue-600" : ""
-            )}
-            replace
-          >
-            {React.cloneElement(tab.icon as React.ReactElement, {
-              className: classNames(" text-[24px]"),
-            })}
-          </Link>
+          <>
+            <Link
+              key={index}
+              href={tab.path}
+              onClick={tab.onClick}
+              className={classNames(
+                "flex items-center justify-center w-[48px] h-full active:text-blue-600",
+                tab.path === pathname ? "text-blue-600" : ""
+              )}
+              replace
+            >
+              <span className="icon-wrapper">
+                {React.cloneElement(tab.icon as React.ReactElement<any>, {
+                  className: classNames(" text-[24px]"),
+                })}
+              </span>
+            </Link>
+          </>
         );
       })}
     </nav>
