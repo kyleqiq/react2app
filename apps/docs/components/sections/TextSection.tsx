@@ -12,8 +12,8 @@ const TextSection = () => {
       </h2>
 
       <p className="text-[18px] md:text-[24px] text-slate-500 italic mt-4 md:mt-10">
-        * Skip the <span>"App-related"</span> headaches. Start building what
-        matters.
+        * No need to build your app separately. Just make a Next.js site and
+        boom! There's an app already.
       </p>
     </div>
   );
