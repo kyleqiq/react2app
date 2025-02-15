@@ -1,7 +1,5 @@
 "use client";
 
-import { StackNavigation } from "@next2app/stack-navigation";
-
 export const insets = { top: 56, bottom: 24 };
 
 interface NavbarProps {
@@ -21,12 +19,12 @@ export default function AppLayout({
 
   return (
     <div>
-      <StackNavigation animationDisabledUrls={navPaths}>
-        <>
-          {children}
-          {navbar}
-        </>
-      </StackNavigation>
+      {/* <StackNavigation animationDisabledUrls={navPaths}> */}
+      <>
+        {children}
+        {navbar}
+      </>
+      {/* </StackNavigation> */}
     </div>
   );
 }
