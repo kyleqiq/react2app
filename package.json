@@ -1,6 +1,7 @@
 {
-  "name": "@next2app/monorepo",
+  "name": "@react2app/monorepo",
   "private": true,
+  "license": "ISC",
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",

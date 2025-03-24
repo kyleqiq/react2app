@@ -14,7 +14,7 @@ So that's what I built. Literally just wrap your app with this:
 
 ```tsx
 // app/layout.tsx
-import { StackNavigation } from "@next2app/stack-navigation";
+import { StackNavigation } from "@react2app/stack-navigation";
 
 export default function RootLayout({ children }) {
   return (
@@ -44,20 +44,20 @@ Install the package:
 
 ```bash
 # npm folks
-npm install @next2app/stack-navigation
+npm install @react2app/stack-navigation
 
 # yarn if that's your thing
-yarn add @next2app/stack-navigation
+yarn add @react2app/stack-navigation
 
 # pnpm gang
-pnpm add @next2app/stack-navigation
+pnpm add @react2app/stack-navigation
 ```
 
 Add it in your layout:
 
 ```tsx
 // app/layout.tsx
-import { StackNavigation } from "@next2app/stack-navigation";
+import { StackNavigation } from "@react2app/stack-navigation";
 
 export default function RootLayout({
   children,
@@ -120,7 +120,7 @@ Currently, this is a work in progress. I'm keep working on it to make it more ro
 
 ## License
 
-MIT © kyleqiq
+ISC © kyleqiq
 
 ---
 

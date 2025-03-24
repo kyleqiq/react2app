@@ -1,7 +1,7 @@
 {
-  "name": "@next2app/stack-navigation",
+  "name": "@react2app/stack-navigation",
   "description": "Smooth native-like page transitions for Next.js",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
@@ -42,7 +42,7 @@
     "react-dom": ">=17.0.0"
   },
   "devDependencies": {
-    "@next2app/typescript-config": "workspace:*",
+    "@react2app/typescript-config": "workspace:*",
     "@rollup/plugin-commonjs": "^28.0.1",
     "@rollup/plugin-node-resolve": "^15.3.0",
     "@rollup/plugin-typescript": "^12.1.1",
