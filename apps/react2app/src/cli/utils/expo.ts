@@ -61,7 +61,7 @@ export async function createExpoProject({
     ];
 
     const progressBar = new cliProgress.SingleBar({
-      format: `📦 Transforming Next.js to App... |${colors.cyan("{bar}")}| {percentage}%`,
+      format: `📦 Transforming React to App... |${colors.cyan("{bar}")}| {percentage}%`,
       barCompleteChar: "\u2588",
       barIncompleteChar: "\u2591",
       hideCursor: true,

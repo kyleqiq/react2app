@@ -21,7 +21,7 @@ export const initR2A = async (
   }
 ) => {
   try {
-    // Setup Next.js R2A config file
+    // Setup R2A config file
     await createR2AConfig();
     // - Update config values based on package name in package.json
     const packageJson = new Conf({
