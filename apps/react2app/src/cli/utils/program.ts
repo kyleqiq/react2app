@@ -73,20 +73,16 @@ export async function findMissingPrograms(requiredPrograms: Program[]) {
 export const ensureRequiredProgramInstalled = async (
   requiredPrograms: Program[]
 ) => {
-  logger.info("Checking required programs...");
   const missingPrograms = await findMissingPrograms(requiredPrograms);
   if (missingPrograms.length > 0) {
-    logger.warning(
-      `Some of the required programs are not installed. ${missingPrograms.join(", ")}`
-    );
     const isAllowed = await promptRequiredProgramsInstall();
     if (!isAllowed) {
-      logger.error("Please install the required programs to build.");
-      process.exit(1);
+      throw new Error(
+        `Some of the required programs are not installed. ${missingPrograms.join(", ")}. Please install the required programs to build.`
+      );
     }
     for (const missingProgram of missingPrograms) {
       await PROGRAM_COMMANDS[missingProgram].install();
     }
   }
-  logger.success("All required programs are installed.");
 };
