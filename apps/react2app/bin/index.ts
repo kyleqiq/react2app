@@ -12,12 +12,11 @@ import {
 import { init } from "../src/cli/commands/init.js";
 import { Platform } from "../src/cli/types/index.js";
 
+const VERSION = "0.5.10";
+
 const program = new Command();
 
-program
-  .name("react2app")
-  .description("CLI tool for React applications")
-  .version("1.0.0");
+program.version(VERSION, "-v, --version", "output the current version");
 
 program
   .command("dev [platform]")
