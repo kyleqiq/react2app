@@ -4,6 +4,7 @@ import fs from "fs-extra";
 import path from "path";
 import { PATHS } from "../utils/path.js";
 import { FILE_NAMES } from "../config/constants.js";
+import { updateExpoEnvFile } from "../utils/expo.js";
 
 export const syncExpoProject = async () => {
   await syncExpoConfigWithR2A();
@@ -13,9 +14,21 @@ export const syncExpoProject = async () => {
 // Sync Expo config with R2A config
 export const syncExpoConfigWithR2A = async () => {
   // read R2A config
-  const config = await import(PATHS.R2A.CONFIG_FILE);
-  const { projectName, displayName, appId, design, scheme, version } =
-    config.default;
+  const { default: R2AConfig } = await import(PATHS.R2A.CONFIG_FILE);
+  const {
+    projectName,
+    displayName,
+    appId,
+    design,
+    scheme,
+    version,
+    productionUrl,
+  } = R2AConfig;
+
+  // Update Expo env file
+  await updateExpoEnvFile({
+    EXPO_PUBLIC_WEBVIEW_URL: productionUrl,
+  });
 
   // read Expo config
   const { ROOT: EXPO_ROOT } = await PATHS.getExpoPaths();
@@ -52,6 +65,7 @@ export const syncExpoConfigWithR2A = async () => {
       ],
     },
   };
+
   await fs.writeJson(appConfigPath, expoConfig, { spaces: 2 });
 };
 
