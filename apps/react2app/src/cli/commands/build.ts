@@ -14,7 +14,12 @@ import {
 } from "../config/programs.js";
 import { ensureR2AKeyStore, setSDKLocation } from "../utils/android.js";
 import { copyFastLaneConfig, runFastlaneBuild } from "../utils/fastlane.js";
-import { updateExpoEnvFile } from "../utils/expo.js";
+import pkg from "@next/env";
+import { syncExpoConfigWithR2A } from "../features/sync.js";
+import ora from "ora";
+
+const { loadEnvConfig } = pkg;
+loadEnvConfig(PATHS.NEXTJS.ROOT);
 
 // Register the autocomplete prompt
 inquirer.registerPrompt("autocomplete", inquirerAutocomplete);
@@ -36,11 +41,20 @@ const buildIOS = async () => {
   await copyFastLaneConfig(expoPaths.IOS.ROOT);
 
   const { default: R2AConfig } = await import(R2AConfigPath);
+  const appName = R2AConfig.displayName.replace(/\s/g, "");
+  const teamId = R2AConfig.ios.teamId;
+
   await runFastlaneBuild(PLATFORM.IOS, expoPaths.IOS.ROOT, {
     ...process.env,
-    APP_NAME: R2AConfig.displayName.replace(/\s/g, ""),
-    TEAM_ID: R2AConfig.ios.teamId,
+    APP_NAME: appName,
+    TEAM_ID: teamId,
   });
+
+  // Copy build file to R2A root
+  await runSpawn("cp", [
+    `${expoPaths.IOS.IPA_DIR}/${appName}.ipa`,
+    `${PATHS.R2A.ROOT}`,
+  ]);
 };
 
 const buildAndroid = async () => {
@@ -62,37 +76,53 @@ const buildAndroid = async () => {
   });
 };
 
+const removeIOSBuild = async () => {
+  const { IOS } = await PATHS.getExpoPaths();
+  await runSpawn("rm", ["-rf", IOS.ROOT]);
+};
+
+const removeAndroidBuild = async () => {
+  const { ANDROID } = await PATHS.getExpoPaths();
+  await runSpawn("rm", ["-rf", ANDROID.ROOT]);
+};
+
 export const build = async (
   platform: Platform,
   options: BuildCommandOptions
 ) => {
+  const spinner = ora(
+    `📦 Building ${platform?.toUpperCase()} app (time for coffee ... see you in 10 minutes!)`
+  ).start();
   try {
     // Install required program
     let requiredPrograms: Program[] = [...COMMON_REQUIRED_PROGRAMS];
+
     if (platform === PLATFORM.IOS) {
       requiredPrograms.push(...IOS_REQUIRED_PROGRAMS);
     } else if (platform === PLATFORM.ANDROID) {
       requiredPrograms.push(...ANDROID_REQUIRED_PROGRAMS);
     }
+
     await ensureRequiredProgramInstalled(requiredPrograms);
 
-    // set production url
-    const { default: R2AConfig } = await import(PATHS.R2A.CONFIG_FILE);
-    await updateExpoEnvFile({
-      EXPO_PUBLIC_WEBVIEW_URL: R2AConfig.productionUrl,
-    });
+    // Sync expo config with R2A config
+    await syncExpoConfigWithR2A();
 
     // Build app
     if (platform === PLATFORM.IOS) {
+      await removeIOSBuild();
       await buildIOS();
     }
     if (platform === PLATFORM.ANDROID) {
+      await removeAndroidBuild();
       await buildAndroid();
     }
+    spinner.succeed("Build completed! You can now check the react2app folder.");
   } catch (error) {
     if (error instanceof Error) {
       logger.error(error.message);
     }
+    spinner.fail("Build failed.");
     process.exit(1);
   }
 };

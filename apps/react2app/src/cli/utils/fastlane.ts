@@ -3,6 +3,7 @@ import path from "path";
 import { PATHS } from "./path.js";
 import { runSpawn } from "./program.js";
 import { Platform } from "../types/index.js";
+import ora from "ora";
 
 export const copyFastLaneConfig = async (
   destinationPath: string,
@@ -26,9 +27,9 @@ export const runFastlaneBuild = async (
   cwd: string,
   env: Record<string, string>
 ) => {
-  await runSpawn("fastlane", [platform, "build", "--verbose"], {
+  await runSpawn("fastlane", [platform, "build"], {
     cwd,
-    stdio: "inherit",
+    stdio: ["ignore", "pipe", "pipe"],
     env,
   });
 };

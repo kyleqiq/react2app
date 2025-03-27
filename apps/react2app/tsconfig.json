@@ -10,6 +10,6 @@
     "declaration": true,
     "declarationDir": "./dist"
   },
-  "include": ["src/components/**/*", "src/components/index.ts"],
+  "include": ["src/components/**/*", "src/components/index.ts", "src/sdk/**/*"],
   "exclude": ["node_modules", "dist"]
 }

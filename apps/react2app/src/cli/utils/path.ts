@@ -91,9 +91,23 @@ export const PATHS = {
           expoAppName,
           "android"
         ),
+        BUILD: path.join(
+          process.cwd(),
+          DIRECTORY_NAMES.R2A,
+          expoAppName,
+          "android",
+          "build"
+        ),
       },
       IOS: {
         ROOT: path.join(process.cwd(), DIRECTORY_NAMES.R2A, expoAppName, "ios"),
+        IPA_DIR: path.join(
+          process.cwd(),
+          DIRECTORY_NAMES.R2A,
+          expoAppName,
+          "ios",
+          "build"
+        ),
       },
       APP_CONFIG: path.join(
         process.cwd(),

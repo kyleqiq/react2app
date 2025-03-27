@@ -1,6 +1,6 @@
 {
   "name": "react2app",
-  "version": "0.5.9",
+  "version": "0.5.10",
   "type": "module",
   "bin": {
     "react2app": "./dist/bin/index.js"
@@ -26,9 +26,11 @@
   "peerDependencies": {
     "next": ">=13.0.0",
     "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
+    "react-dom": ">=18.0.0",
+    "react-native": ">=0.72.0"
   },
   "dependencies": {
+    "@next/env": "^15.2.4",
     "@types/conf": "^3.0.3",
     "@types/dotenv": "^8.2.3",
     "@types/fs-extra": "^11.0.4",
@@ -67,6 +69,7 @@
     "next": "^15.0.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-native": "0.76.1",
     "ts-jest": "^29.0.0",
     "typescript": "^5.3.0"
   }
