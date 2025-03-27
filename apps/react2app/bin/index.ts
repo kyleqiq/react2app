@@ -11,8 +11,9 @@ import {
 } from "../src/cli/types/index.js";
 import { init } from "../src/cli/commands/init.js";
 import { Platform } from "../src/cli/types/index.js";
+import { getPackageVersion } from "../src/cli/utils/version.js";
 
-const VERSION = "0.5.10";
+const VERSION = getPackageVersion();
 
 const program = new Command();
 
