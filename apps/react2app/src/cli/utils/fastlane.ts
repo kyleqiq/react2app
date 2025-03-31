@@ -3,7 +3,7 @@ import path from "path";
 import { PATHS } from "./path.js";
 import { runSpawn } from "./program.js";
 import { Platform } from "../types/index.js";
-import ora from "ora";
+import { ensurePrebuild } from "../commands/build/prebuild.js";
 
 export const copyFastLaneConfig = async (
   destinationPath: string,
@@ -24,12 +24,16 @@ export const copyFastLaneConfig = async (
 
 export const runFastlaneBuild = async (
   platform: Platform,
-  cwd: string,
   env: Record<string, string>
 ) => {
-  await runSpawn("fastlane", [platform, "build"], {
-    cwd,
-    stdio: ["ignore", "pipe", "pipe"],
-    env,
-  });
+  try {
+    const prebuildPath = await ensurePrebuild(platform);
+    await runSpawn("fastlane", [platform, "build"], {
+      cwd: prebuildPath,
+      stdio: ["ignore", "pipe", "pipe"],
+      env,
+    });
+  } catch (error) {
+    throw new Error(`Failed to run fastlane build: ${error.message}`);
+  }
 };

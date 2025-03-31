@@ -23,7 +23,7 @@ export const FILE_NAMES = {
     TEMPLATE: "@react2app/expo-template",
   },
   ANDROID: {
-    KEYSTORE: "release.keystore",
+    KEYSTORE: "upload.keystore",
     KEY_ALIAS: "upload",
   },
 } as const;

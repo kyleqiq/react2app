@@ -10,7 +10,7 @@ import {
   setWebServerAddress,
 } from "../utils/devServer.js";
 import { logger } from "../utils/logger.js";
-import { loadR2AConfig as loadR2AConfig } from "../utils/config.js";
+import { loadR2AConfig } from "../utils/config.js";
 import { DEV_SERVERS } from "../config/devServer.js";
 import { initR2A } from "../features/init.js";
 import { validateProjectRoot } from "../utils/path.js";

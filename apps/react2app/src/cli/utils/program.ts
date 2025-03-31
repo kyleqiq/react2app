@@ -1,7 +1,15 @@
 import inquirer from "inquirer";
 import { spawn } from "node:child_process";
-import { Program, PROGRAM_COMMANDS } from "../config/programs.js";
+import {
+  ANDROID_REQUIRED_PROGRAMS,
+  COMMON_REQUIRED_PROGRAMS,
+  IOS_REQUIRED_PROGRAMS,
+  Program,
+  PROGRAM_COMMANDS,
+} from "../config/programs.js";
 import { logger } from "./logger.js";
+import { PLATFORM } from "../constants/index.js";
+import { Platform } from "../types/index.js";
 
 export const runSpawn = (
   command: string,
@@ -80,10 +88,18 @@ export async function findMissingPrograms(requiredPrograms: Program[]) {
   return missingPrograms;
 }
 
-export const ensureRequiredProgramInstalled = async (
-  requiredPrograms: Program[]
-) => {
+export const ensureRequiredProgramInstalled = async (platform: Platform) => {
+  // Get required programs
+  let requiredPrograms: Program[] = [...COMMON_REQUIRED_PROGRAMS];
+  if (platform === PLATFORM.IOS) {
+    requiredPrograms.push(...IOS_REQUIRED_PROGRAMS);
+  } else if (platform === PLATFORM.ANDROID) {
+    requiredPrograms.push(...ANDROID_REQUIRED_PROGRAMS);
+  }
+
+  // Find missing programs
   const missingPrograms = await findMissingPrograms(requiredPrograms);
+
   if (missingPrograms.length > 0) {
     // Execute install command
     // const isInstallAllowed = await promptRequiredProgramsInstall();

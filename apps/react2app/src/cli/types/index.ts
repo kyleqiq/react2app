@@ -15,9 +15,32 @@ export interface BuildCommandOptions {
 }
 
 export interface R2AConfig {
-  name: string;
-  ios: boolean;
-  android: boolean;
+  projectName: string;
+  displayName: string;
+  appId: string;
+  productionUrl: string;
+  version: string;
+  scheme: string;
+  ios: {
+    teamId: string;
+  };
+  android: {
+    keyStore: {
+      keystorePath: string;
+      keystorePassword: string;
+      keyAlias: string;
+      keyPassword: string;
+      test?: string;
+    };
+  };
+  design: {
+    icon: string;
+    splash: {
+      backgroundColor: string;
+      image: string;
+      imageWidth: number;
+    };
+  };
 }
 
 export interface CommandConfig {
@@ -32,3 +55,10 @@ export type PackageManager = "npm" | "yarn" | "pnpm" | "auto";
 export type Framework = (typeof FRAMEWORK)[keyof typeof FRAMEWORK];
 
 export type Platform = (typeof PLATFORM)[keyof typeof PLATFORM];
+
+export type KeyStore = {
+  keyStorePath: string;
+  keyStorePassword: string;
+  keyAlias: string;
+  keyPassword: string;
+};

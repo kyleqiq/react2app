@@ -5,6 +5,7 @@ import path from "path";
 import { PATHS } from "../utils/path.js";
 import { FILE_NAMES } from "../config/constants.js";
 import { updateExpoEnvFile } from "../utils/expo.js";
+import { ensureR2AConfig } from "../utils/config.js";
 
 export const syncExpoProject = async () => {
   await syncExpoConfigWithR2A();
@@ -14,7 +15,7 @@ export const syncExpoProject = async () => {
 // Sync Expo config with R2A config
 export const syncExpoConfigWithR2A = async () => {
   // read R2A config
-  const { default: R2AConfig } = await import(PATHS.R2A.CONFIG_FILE);
+  const R2AConfig = await ensureR2AConfig();
   const {
     projectName,
     displayName,

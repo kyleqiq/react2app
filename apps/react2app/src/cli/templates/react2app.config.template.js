@@ -10,7 +10,7 @@ const config = {
   },
   android: {
     keyStore: {
-      keystorePath: "./release.keystore",
+      keystorePath: "./react2app/upload.keystore",
       keystorePassword: process.env.R2A_ANDROID_KEYSTORE_PASSWORD,
       keyAlias: "upload",
       keyPassword: process.env.R2A_ANDROID_KEY_PASSWORD,

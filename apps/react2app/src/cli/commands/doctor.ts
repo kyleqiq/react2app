@@ -1,4 +1,4 @@
-import { loadR2AConfig } from "../utils/config.js";
+import { ensureR2AConfig, loadR2AConfig } from "../utils/config.js";
 import { validateExpoProject } from "../utils/expo.js";
 import { validateR2AConfig } from "../utils/validation.js";
 import { ConfigError, ERROR_CODE, ERROR_MESSAGES } from "../errors/index.js";
@@ -10,13 +10,7 @@ export const doctor = async () => {
     {
       name: "Loading R2A Config",
       task: async () => {
-        const config = await loadR2AConfig();
-        if (!config) {
-          throw new ConfigError(
-            ERROR_MESSAGES.CONFIG.NOT_FOUND,
-            ERROR_CODE.CONFIG.NOT_FOUND
-          );
-        }
+        const config = await ensureR2AConfig();
         return config;
       },
     },

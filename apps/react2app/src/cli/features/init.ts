@@ -1,5 +1,9 @@
 import { createExpoEnvFile, createExpoProject } from "../utils/expo.js";
-import { createR2AConfig } from "../utils/config.js";
+import {
+  createR2AConfig,
+  ensureR2AConfig,
+  loadR2AConfig,
+} from "../utils/config.js";
 import { updateEnvFile } from "../utils/env.js";
 import { PATHS } from "../utils/path.js";
 import Conf from "conf";
@@ -33,7 +37,7 @@ export const initR2A = async (
     const projectName = convertPackageNameToProjectName(packageName);
     const displayName = convertPackageNameToDisplayName(packageName);
     const appId = convertPackageNameToAppId(packageName);
-    const { default: R2AConfig } = await import(PATHS.R2A.CONFIG_FILE);
+    const R2AConfig = await ensureR2AConfig();
     R2AConfig.projectName = projectName;
     R2AConfig.displayName = displayName;
     R2AConfig.appId = appId;
@@ -47,7 +51,7 @@ export const initR2A = async (
     // Setup Next.js .env.local file
     await fs.ensureFile(PATHS.NEXTJS.ENV_FILE);
     await updateEnvFile(PATHS.NEXTJS.ENV_FILE, {
-      R2A_IOS_TEAM_ID: "PUT_YOUR_TEAM_ID_HERE",
+      R2A_IOS_TEAM_ID: "PUT_YOUR_IOS_TEAM_ID_HERE",
       R2A_ANDROID_KEYSTORE_PASSWORD: "PUT_YOUR_KEYSTORE_PASSWORD_HERE",
       R2A_ANDROID_KEY_PASSWORD: "PUT_YOUR_KEY_PASSWORD_HERE",
     });

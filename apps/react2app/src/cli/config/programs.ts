@@ -1,5 +1,6 @@
 import { runSpawn } from "../utils/program.js";
 import { spawn } from "child_process";
+import fs from "fs-extra";
 
 export const PROGRAM = {
   XCODE: "Xcode",
@@ -124,16 +125,9 @@ export const PROGRAM_COMMANDS: Record<
   },
   [PROGRAM.ANDROID_STUDIO]: {
     isInstalled: async () => {
-      try {
-        await runSpawnSafe(
-          "/Applications/Android Studio.app/Contents/MacOS/studio",
-          ["--help"]
-        );
-        return true;
-      } catch (error) {
-        console.log(error);
-        return false;
-      }
+      const studioAppPath = "/Applications/Android Studio.app";
+      if (fs.existsSync(studioAppPath)) return true;
+      return false;
     },
     install: async () => {
       console.log(
@@ -141,6 +135,7 @@ export const PROGRAM_COMMANDS: Record<
       );
       process.exit(1);
     },
+    docs: "http://localhost:3000/docs/guide/build-and-publish#install-required-tools-1",
   },
 };
 

@@ -70,9 +70,6 @@ export const PATHS = {
     CONFIG_FILE: path.join(process.cwd(), FILE_NAMES.NEXTJS.CONFIG),
     LAYOUT_FILE: path.join(process.cwd(), "/app", FILE_NAMES.NEXTJS.LAYOUT),
   },
-  ANDROID: {
-    KEYSTORE: path.resolve(process.cwd(), FILE_NAMES.ANDROID.KEYSTORE),
-  },
   getExpoPaths: async () => {
     const expoAppName = await getExpoAppNameFromConfig();
     return {
@@ -91,17 +88,26 @@ export const PATHS = {
           expoAppName,
           "android"
         ),
-        BUILD: path.join(
+        BUILD_DIR: path.join(
           process.cwd(),
           DIRECTORY_NAMES.R2A,
           expoAppName,
           "android",
-          "build"
+          "app",
+          "build",
+          "outputs",
+          "bundle",
+          "release"
+        ),
+        KEYSTORE: path.resolve(
+          process.cwd(),
+          DIRECTORY_NAMES.R2A,
+          FILE_NAMES.ANDROID.KEYSTORE
         ),
       },
       IOS: {
         ROOT: path.join(process.cwd(), DIRECTORY_NAMES.R2A, expoAppName, "ios"),
-        IPA_DIR: path.join(
+        BUILD_DIR: path.join(
           process.cwd(),
           DIRECTORY_NAMES.R2A,
           expoAppName,

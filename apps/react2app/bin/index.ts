@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { dev } from "../src/cli/commands/dev.js";
-import { build } from "../src/cli/commands/build.js";
+import build from "../src/cli/commands/build/index.js";
 import { deploy } from "../src/cli/commands/deploy.js";
 import { clean } from "../src/cli/commands/clean.js";
 import { doctor } from "../src/cli/commands/doctor.js";
@@ -12,6 +12,17 @@ import {
 import { init } from "../src/cli/commands/init.js";
 import { Platform } from "../src/cli/types/index.js";
 import { getPackageVersion } from "../src/cli/utils/version.js";
+import { PATHS } from "../src/cli/utils/path.js";
+import pkg from "@next/env";
+import inquirer from "inquirer";
+import inquirerAutocomplete from "inquirer-autocomplete-prompt";
+
+// Load Next.js env variables
+const { loadEnvConfig } = pkg;
+loadEnvConfig(PATHS.NEXTJS.ROOT);
+
+// inquirer setup
+inquirer.registerPrompt("autocomplete", inquirerAutocomplete);
 
 const VERSION = getPackageVersion();
 

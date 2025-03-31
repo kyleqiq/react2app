@@ -6,6 +6,8 @@ import { runSpawn } from "./program.js";
 import { homedir } from "os";
 import path from "path";
 import dotenv from "dotenv";
+import { ensureR2AConfig } from "./config.js";
+import { updateEnvFile } from "./env.js";
 
 export const generateKeyStore = async (options: {
   keyStorePath: string;
@@ -13,7 +15,6 @@ export const generateKeyStore = async (options: {
   keyStorePassword: string;
   keyPassword: string;
 }) => {
-  console.log(options);
   try {
     await runSpawn("keytool", [
       "-genkey",
@@ -49,19 +50,26 @@ export const generateKeyStore = async (options: {
 
 // Key Store
 export const ensureR2AKeyStore = async () => {
-  const { default: R2AConfig } = await import(PATHS.R2A.CONFIG_FILE);
+  const R2AConfig = await ensureR2AConfig();
+  const { ANDROID } = await PATHS.getExpoPaths();
   const isKeyStoreExist = await fs.existsSync(
-    R2AConfig.android.keyStore.keystorePath
+    path.resolve(process.cwd(), R2AConfig.android.keyStore.keystorePath)
   );
 
   // If key store does not exist, generate it
   if (!isKeyStoreExist) {
+    console.log("\n");
     const { password } = await inquirer.prompt([
       {
         type: "password",
         name: "password",
         message:
-          '💬 KeyStore/Key Password\n\nTo upload your app to the Play Store, you need a signed .aab! (build output)\nThink of this like your personal signature on build file saying\n"Yes, this is my app and I approve this release."\n\nPlease type the new password (at least 6 characters):',
+          "🔐  Creating a KeyStore...\n\n" +
+          "To upload your app to the Play Store, you need a signed .aab file!\n" +
+          "Think of this like your personal signature on build file saying\n" +
+          '"Yes, this is my app, and I approve this build."\n' +
+          "Since you haven't provided a proper keystore in react2app.config.js, we'll create one for you.\n\n" +
+          "Please type the new password for your keystore (at least 6 characters):",
         validate: (input: string) => {
           if (input.length < 6) {
             return "Password must be at least 6 characters long";
@@ -72,20 +80,27 @@ export const ensureR2AKeyStore = async () => {
     ]);
 
     const keyStore = await generateKeyStore({
-      keyStorePath: PATHS.ANDROID.KEYSTORE,
+      keyStorePath: ANDROID.KEYSTORE,
       keyStorePassword: password,
       keyAlias: FILE_NAMES.ANDROID.KEY_ALIAS,
       keyPassword: password,
     });
+
+    console.log(
+      "\nKeystore created successfully! You can find it in /react2app folder\n"
+    );
+
+    await updateEnvFile(PATHS.NEXTJS.ENV_FILE, {
+      R2A_ANDROID_KEYSTORE_PASSWORD: password,
+      R2A_ANDROID_KEY_PASSWORD: password,
+    });
     return keyStore;
   }
 
-  // If key store exists but password is not set, prompt user to set the password
-  dotenv.config();
-  const { parsed: R2AEnvFile } = dotenv.config({ path: PATHS.NEXTJS.ENV_FILE });
+  // If key store exists but password is not set, throw error
   const isPasswordSet =
-    R2AEnvFile?.R2A_ANDROID_KEYSTORE_PASSWORD &&
-    R2AEnvFile?.R2A_ANDROID_KEY_PASSWORD;
+    R2AConfig.android.keyStore.keystorePassword &&
+    R2AConfig.android.keyStore.keyPassword;
 
   if (!isPasswordSet) {
     throw new Error(
@@ -95,13 +110,13 @@ export const ensureR2AKeyStore = async () => {
 
   return {
     keyStorePath: path.resolve(R2AConfig.android.keyStore.keystorePath),
-    keyStorePassword: R2AEnvFile.R2A_ANDROID_KEYSTORE_PASSWORD,
+    keyStorePassword: process.env.R2A_ANDROID_KEYSTORE_PASSWORD,
     keyAlias: R2AConfig.android.keyStore.keyAlias,
-    keyPassword: R2AEnvFile.R2A_ANDROID_KEY_PASSWORD,
+    keyPassword: process.env.R2A_ANDROID_KEY_PASSWORD,
   };
 };
 
-export const setSDKLocation = async (androidRoot: string) => {
+export const setAndroidSDKLocation = async (androidRoot: string) => {
   try {
     const sdkPath = `sdk.dir=${homedir()}/Library/Android/sdk`;
     await fs.writeFile(path.join(androidRoot, "local.properties"), sdkPath);
