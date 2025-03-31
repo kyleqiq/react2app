@@ -1,4 +1,5 @@
 import { runSpawn } from "../utils/program.js";
+import { spawn } from "child_process";
 
 export const PROGRAM = {
   XCODE: "Xcode",
@@ -9,40 +10,94 @@ export const PROGRAM = {
 
 export type Program = (typeof PROGRAM)[keyof typeof PROGRAM];
 
+export function runSpawnSafe(
+  command: string,
+  args: string[]
+): Promise<boolean> {
+  return new Promise((resolve) => {
+    const child = spawn(command, args, {
+      stdio: ["pipe", "pipe", "pipe"],
+      shell: true,
+    });
+
+    child.on("error", (err) => {
+      resolve(false);
+      throw err;
+    });
+
+    child.on("exit", (code) => {
+      resolve(code === 0);
+    });
+  });
+}
+
+// Add a new function that returns stdout
+export function runSpawnWithOutput(
+  command: string,
+  args: string[]
+): Promise<{ success: boolean; stdout: string }> {
+  return new Promise((resolve) => {
+    const child = spawn(command, args, {
+      stdio: ["pipe", "pipe", "pipe"],
+      shell: true,
+    });
+
+    let stdout = "";
+
+    child.stdout.on("data", (data) => {
+      stdout += data.toString();
+    });
+
+    child.on("error", () => {
+      resolve({ success: false, stdout: "" });
+    });
+
+    child.on("exit", (code) => {
+      resolve({ success: code === 0, stdout });
+    });
+  });
+}
+
 export const PROGRAM_COMMANDS: Record<
   Program,
   {
     version?: { command: string; args: string[] };
     install: () => Promise<void>;
-
     isInstalled: () => Promise<boolean>;
+    docs?: string;
   }
 > = {
   [PROGRAM.XCODE]: {
     install: async () => {
-      await runSpawn("xcode-select", ["--install"], { stdio: "pipe" });
+      await runSpawn("xcode-select", ["--install"]);
     },
     isInstalled: async () => {
       try {
-        await runSpawn("xcode-select", ["-v"], { stdio: "pipe" });
-        return true;
+        const { success, stdout } = await runSpawnWithOutput("xcode-select", [
+          "-p",
+        ]);
+        if (success && stdout.includes("Xcode.app")) {
+          return true;
+        }
+        return false;
       } catch (error) {
         console.log(error);
         return false;
       }
     },
+    docs: "https://react2app.com/docs/guide/build-and-publish#step-2-build-ipa-file",
   },
 
   [PROGRAM.BREW]: {
     install: async () => {
-      await runSpawn("/bin/bash", [
+      await runSpawnSafe("/bin/bash", [
         "-c",
         "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)",
       ]);
     },
     isInstalled: async () => {
       try {
-        await runSpawn("brew", ["-v"], { stdio: "pipe" });
+        await runSpawnSafe("brew", ["-v"]);
         return true;
       } catch (error) {
         console.log(error);
@@ -52,25 +107,27 @@ export const PROGRAM_COMMANDS: Record<
   },
   [PROGRAM.FASTLANE]: {
     install: async () => {
-      await runSpawn("brew", ["install", "fastlane"], { stdio: "pipe" });
+      await runSpawnSafe("brew", ["install", "fastlane"]);
     },
     isInstalled: async () => {
       try {
-        await runSpawn("fastlane", ["-v"], { stdio: "pipe" });
-        return true;
+        const { success, stdout } = await runSpawnWithOutput("fastlane", [
+          "-v",
+        ]);
+        return success;
       } catch (error) {
-        console.log(error);
+        console.error(error);
         return false;
       }
     },
+    docs: "https://react2app.com/docs/guide/build-and-publish#step-2-build-ipa-file",
   },
   [PROGRAM.ANDROID_STUDIO]: {
     isInstalled: async () => {
       try {
-        await runSpawn(
+        await runSpawnSafe(
           "/Applications/Android Studio.app/Contents/MacOS/studio",
-          ["--help"],
-          { stdio: "pipe" }
+          ["--help"]
         );
         return true;
       } catch (error) {

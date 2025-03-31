@@ -10,7 +10,9 @@ export interface DevCommandOptions {
   dev?: boolean;
 }
 
-export interface BuildCommandOptions {}
+export interface BuildCommandOptions {
+  verbose?: boolean;
+}
 
 export interface R2AConfig {
   name: string;

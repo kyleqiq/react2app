@@ -59,10 +59,20 @@ export const promptRequiredProgramsInstall = async () => {
 export async function findMissingPrograms(requiredPrograms: Program[]) {
   const programInstallCheckResults = await Promise.all(
     requiredPrograms.map(async (program) => {
-      const isInstalled = await PROGRAM_COMMANDS[program].isInstalled();
-      return { program, isInstalled };
+      try {
+        const isInstalled = await PROGRAM_COMMANDS[program].isInstalled();
+        return { program, isInstalled, docs: PROGRAM_COMMANDS[program].docs };
+      } catch (error) {
+        console.error(`error occurred while checking ${program} `, error);
+        return {
+          program,
+          isInstalled: false,
+          docs: PROGRAM_COMMANDS[program].docs,
+        };
+      }
     })
   );
+
   const missingPrograms = programInstallCheckResults
     .filter(({ isInstalled }) => !isInstalled)
     .map(({ program }) => program);
@@ -75,14 +85,17 @@ export const ensureRequiredProgramInstalled = async (
 ) => {
   const missingPrograms = await findMissingPrograms(requiredPrograms);
   if (missingPrograms.length > 0) {
-    const isAllowed = await promptRequiredProgramsInstall();
-    if (!isAllowed) {
-      throw new Error(
-        `Some of the required programs are not installed. ${missingPrograms.join(", ")}. Please install the required programs to build.`
-      );
-    }
-    for (const missingProgram of missingPrograms) {
-      await PROGRAM_COMMANDS[missingProgram].install();
-    }
+    // Execute install command
+    // const isInstallAllowed = await promptRequiredProgramsInstall();
+    // if (isInstallAllowed) {
+    //   for (const missingProgram of missingPrograms) {
+    //     await PROGRAM_COMMANDS[missingProgram].install();
+    //   }
+    //   return;
+    // }
+    const errorMessages = missingPrograms.map((missingProgram) => {
+      return `'${missingProgram}' is not installed. Please install the required programs to build.\nFor more information: ${PROGRAM_COMMANDS[missingProgram].docs}`;
+    });
+    throw new Error(errorMessages.join("\n"));
   }
 };

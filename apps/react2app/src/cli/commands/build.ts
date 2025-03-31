@@ -87,27 +87,42 @@ const removeAndroidBuild = async () => {
 };
 
 export const build = async (
-  platform: Platform,
+  userSelectedPlatform: Platform | undefined,
   options: BuildCommandOptions
 ) => {
-  const spinner = ora(
-    `📦 Building ${platform?.toUpperCase()} app (time for coffee ... see you in 10 minutes!)`
-  ).start();
+  if (options.verbose) {
+    console.log("Debug mode(verbose mode is enabled)");
+  }
+
+  let platform = userSelectedPlatform;
+  if (!platform) {
+    const { platform: selectedPlatform } = await inquirer.prompt([
+      {
+        type: "list",
+        name: "platform",
+        message: "Select the platform you want to build",
+        choices: [PLATFORM.IOS, PLATFORM.ANDROID],
+      },
+    ]);
+    platform = selectedPlatform as Platform;
+  }
+
+  const buildSpinner = ora(
+    `📦 Building ${platform?.toUpperCase()} app (Time for coffee... See you in 10 minutes!)`
+  );
   try {
     // Install required program
     let requiredPrograms: Program[] = [...COMMON_REQUIRED_PROGRAMS];
-
     if (platform === PLATFORM.IOS) {
       requiredPrograms.push(...IOS_REQUIRED_PROGRAMS);
     } else if (platform === PLATFORM.ANDROID) {
       requiredPrograms.push(...ANDROID_REQUIRED_PROGRAMS);
     }
-
     await ensureRequiredProgramInstalled(requiredPrograms);
 
+    buildSpinner.start();
     // Sync expo config with R2A config
     await syncExpoConfigWithR2A();
-
     // Build app
     if (platform === PLATFORM.IOS) {
       await removeIOSBuild();
@@ -117,12 +132,17 @@ export const build = async (
       await removeAndroidBuild();
       await buildAndroid();
     }
-    spinner.succeed("Build completed! You can now check the react2app folder.");
+
+    if (!options.verbose) {
+      buildSpinner.succeed(
+        "Build completed! You can now check the react2app folder."
+      );
+    }
   } catch (error) {
     if (error instanceof Error) {
       logger.error(error.message);
     }
-    spinner.fail("Build failed.");
+    buildSpinner.fail("Build failed.");
     process.exit(1);
   }
 };
