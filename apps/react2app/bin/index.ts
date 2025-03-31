@@ -17,7 +17,7 @@ const VERSION = getPackageVersion();
 
 const program = new Command();
 
-program.version(VERSION, "-v, --version", "output the current version");
+program.version(VERSION, "-V, --version", "output the current version");
 
 program
   .command("dev [platform]")
@@ -33,6 +33,7 @@ program
 program
   .command("build [platform]")
   .description("Build for production")
+  .option("-v, --verbose", "Show detailed build logs for debugging")
   .action(async (platform: Platform, options: BuildCommandOptions) => {
     build(platform, options);
   });
