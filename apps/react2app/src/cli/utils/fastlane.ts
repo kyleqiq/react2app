@@ -33,7 +33,10 @@ export const runFastlaneBuild = async (
       stdio: ["ignore", "pipe", "pipe"],
       env,
     });
-  } catch (error) {
-    throw new Error(`Failed to run fastlane build: ${error.message}`);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to run fastlane build: ${error.message}`);
+    }
+    throw new Error(`Failed to run fastlane build: ${error}`);
   }
 };

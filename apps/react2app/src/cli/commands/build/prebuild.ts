@@ -28,6 +28,9 @@ export const removePrebuild = async (platform: Platform) => {
   if (platform === PLATFORM.ANDROID) {
     prebuildPath = ANDROID.ROOT;
   }
+  if (!prebuildPath) {
+    throw new Error("Invalid platform");
+  }
   // remove prebuild
   await runSpawn("rm", ["-rf", prebuildPath]);
 };
